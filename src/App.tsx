@@ -33,6 +33,7 @@ import QROrdering from './components/QROrdering';
 import QRClientOrder from './components/QRClientOrder';
 import OnboardingWizard from './components/OnboardingWizard';
 import { sendToTelegram } from './utils/telegram';
+import appLogoImg from './assets/images/app_logo_1784468034081.jpg';
 
 // Icon Imports
 import { 
@@ -41,6 +42,18 @@ import {
   LogOut, Clock, MapPin, Sparkles, Menu, X, ShieldAlert, QrCode,
   Wifi, WifiOff, RefreshCw, FileSpreadsheet, Receipt
 } from 'lucide-react';
+
+function safeGetJson<T>(key: string, fallback: T): T {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return fallback;
+    const saved = localStorage.getItem(key);
+    if (!saved || saved === 'undefined' || saved === 'null') return fallback;
+    return JSON.parse(saved) as T;
+  } catch (e) {
+    console.warn(`Error reading localStorage key "${key}":`, e);
+    return fallback;
+  }
+}
 
 export default function App() {
   // --- CENTRAL STATES ---
@@ -58,95 +71,34 @@ export default function App() {
 
   // Dynamic role permissions state
   const [rolePermissions, setRolePermissions] = useState<RolePermissions>(() => {
-    const saved = localStorage.getItem('kp_rolePermissions');
-    return saved ? JSON.parse(saved) : {
+    return safeGetJson('kp_rolePermissions', {
       Manager: ['DASHBOARD', 'POS', 'QR_ORDERING', 'KITCHEN', 'INVENTORY', 'RECIPES', 'PURCHASE', 'ACCOUNTING', 'QUOTATION', 'RECEIPT', 'CRM', 'REPORTS'],
       Cashier: ['POS', 'QR_ORDERING', 'KITCHEN', 'QUOTATION', 'RECEIPT', 'CRM'],
       Staff: ['KITCHEN']
-    };
+    });
   });
 
   // Database core states
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('kp_users');
-    return saved ? JSON.parse(saved) : mockUsers;
-  });
-  const [branches, setBranches] = useState<Branch[]>(() => {
-    const saved = localStorage.getItem('kp_branches');
-    return saved ? JSON.parse(saved) : mockBranches;
-  });
-  const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => {
-    const saved = localStorage.getItem('kp_storeSettings');
-    return saved ? JSON.parse(saved) : defaultStoreSettings;
-  });
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem('kp_notificationSettings');
-    return saved ? JSON.parse(saved) : defaultNotificationSettings;
-  });
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
-    const saved = localStorage.getItem('kp_menuItems');
-    return saved ? JSON.parse(saved) : mockMenuItems;
-  });
-  const [recipes, setRecipes] = useState<Recipe[]>(() => {
-    const saved = localStorage.getItem('kp_recipes');
-    return saved ? JSON.parse(saved) : mockRecipes;
-  });
-  const [ingredients, setIngredients] = useState<Ingredient[]>(() => {
-    const saved = localStorage.getItem('kp_ingredients');
-    return saved ? JSON.parse(saved) : mockIngredients;
-  });
-  const [suppliers, setSuppliers] = useState<Supplier[]>(() => {
-    const saved = localStorage.getItem('kp_suppliers');
-    return saved ? JSON.parse(saved) : mockSuppliers;
-  });
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(() => {
-    const saved = localStorage.getItem('kp_purchaseOrders');
-    return saved ? JSON.parse(saved) : mockPurchaseOrders;
-  });
-  const [customers, setCustomers] = useState<Customer[]>(() => {
-    const saved = localStorage.getItem('kp_customers');
-    return saved ? JSON.parse(saved) : mockCustomers;
-  });
-  const [promotions, setPromotions] = useState<Promotion[]>(() => {
-    const saved = localStorage.getItem('kp_promotions');
-    return saved ? JSON.parse(saved) : mockPromotions;
-  });
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('kp_orders');
-    return saved ? JSON.parse(saved) : initialOrders;
-  });
-  const [expenses, setExpenses] = useState<Expense[]>(() => {
-    const saved = localStorage.getItem('kp_expenses');
-    return saved ? JSON.parse(saved) : mockExpenses;
-  });
-  const [otherIncomes, setOtherIncomes] = useState<OtherIncome[]>(() => {
-    const saved = localStorage.getItem('kp_otherIncomes');
-    return saved ? JSON.parse(saved) : mockOtherIncomes;
-  });
-  const [tradeReceivables, setTradeReceivables] = useState<TradeReceivable[]>(() => {
-    const saved = localStorage.getItem('kp_tradeReceivables');
-    return saved ? JSON.parse(saved) : mockTradeReceivables;
-  });
-  const [tradePayables, setTradePayables] = useState<TradePayable[]>(() => {
-    const saved = localStorage.getItem('kp_tradePayables');
-    return saved ? JSON.parse(saved) : mockTradePayables;
-  });
-  const [quotations, setQuotations] = useState<Quotation[]>(() => {
-    const saved = localStorage.getItem('kp_quotations');
-    return saved ? JSON.parse(saved) : mockQuotations;
-  });
-  const [officialReceipts, setOfficialReceipts] = useState<OfficialReceipt[]>(() => {
-    const saved = localStorage.getItem('kp_officialReceipts');
-    return saved ? JSON.parse(saved) : mockOfficialReceipts;
-  });
-  const [stockLogs, setStockLogs] = useState<StockCardLog[]>(() => {
-    const saved = localStorage.getItem('kp_stockLogs');
-    return saved ? JSON.parse(saved) : mockStockCardLogs;
-  });
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
-    const saved = localStorage.getItem('kp_auditLogs');
-    return saved ? JSON.parse(saved) : mockAuditLogs;
-  });
+  const [users, setUsers] = useState<User[]>(() => safeGetJson('kp_users', mockUsers));
+  const [branches, setBranches] = useState<Branch[]>(() => safeGetJson('kp_branches', mockBranches));
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => safeGetJson('kp_storeSettings', defaultStoreSettings));
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => safeGetJson('kp_notificationSettings', defaultNotificationSettings));
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => safeGetJson('kp_menuItems', mockMenuItems));
+  const [recipes, setRecipes] = useState<Recipe[]>(() => safeGetJson('kp_recipes', mockRecipes));
+  const [ingredients, setIngredients] = useState<Ingredient[]>(() => safeGetJson('kp_ingredients', mockIngredients));
+  const [suppliers, setSuppliers] = useState<Supplier[]>(() => safeGetJson('kp_suppliers', mockSuppliers));
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(() => safeGetJson('kp_purchaseOrders', mockPurchaseOrders));
+  const [customers, setCustomers] = useState<Customer[]>(() => safeGetJson('kp_customers', mockCustomers));
+  const [promotions, setPromotions] = useState<Promotion[]>(() => safeGetJson('kp_promotions', mockPromotions));
+  const [orders, setOrders] = useState<Order[]>(() => safeGetJson('kp_orders', initialOrders));
+  const [expenses, setExpenses] = useState<Expense[]>(() => safeGetJson('kp_expenses', mockExpenses));
+  const [otherIncomes, setOtherIncomes] = useState<OtherIncome[]>(() => safeGetJson('kp_otherIncomes', mockOtherIncomes));
+  const [tradeReceivables, setTradeReceivables] = useState<TradeReceivable[]>(() => safeGetJson('kp_tradeReceivables', mockTradeReceivables));
+  const [tradePayables, setTradePayables] = useState<TradePayable[]>(() => safeGetJson('kp_tradePayables', mockTradePayables));
+  const [quotations, setQuotations] = useState<Quotation[]>(() => safeGetJson('kp_quotations', mockQuotations));
+  const [officialReceipts, setOfficialReceipts] = useState<OfficialReceipt[]>(() => safeGetJson('kp_officialReceipts', mockOfficialReceipts));
+  const [stockLogs, setStockLogs] = useState<StockCardLog[]>(() => safeGetJson('kp_stockLogs', mockStockCardLogs));
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => safeGetJson('kp_auditLogs', mockAuditLogs));
 
   // Mobile sidebar trigger
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -942,7 +894,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center shrink-0 shadow-md">
               <img 
-                src="/src/assets/images/app_logo_1784468034081.jpg" 
+                src={appLogoImg} 
                 alt="Logo" 
                 className="w-full h-full object-cover" 
                 referrerPolicy="no-referrer"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { Shield, Key, Eye, EyeOff, Store, Lock, Grid } from 'lucide-react';
+import appLogoImg from '../assets/images/app_logo_1784468034081.jpg';
 
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
@@ -119,7 +120,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
         <div className="p-6 text-center border-b border-slate-800 bg-slate-900/50">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-950 border-2 border-slate-800 mb-3 overflow-hidden shadow-xl shadow-slate-950/50">
             <img 
-              src="/src/assets/images/app_logo_1784468034081.jpg" 
+              src={appLogoImg} 
               alt="Logo" 
               className="w-full h-full object-cover" 
               referrerPolicy="no-referrer"

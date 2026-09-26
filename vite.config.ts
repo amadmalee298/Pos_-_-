@@ -4,8 +4,12 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  // If running in GitHub Actions, use repo name from env or default to '/Pos_-_-/'
+  const isGitHub = process.env.GITHUB_ACTIONS === 'true';
+  const repoName = process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` : '/Pos_-_-/';
+
   return {
-    base: './',
+    base: isGitHub ? repoName : (process.env.VITE_BASE_URL || './'),
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
